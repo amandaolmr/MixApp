@@ -2,7 +2,7 @@ package br.com.lanchonete.amanda.mixapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-//Amanda Miranda
+//Amanda Miranda de miranda
 public class MainActivity extends AppCompatActivity {
 
     @Override
