@@ -24,13 +24,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".lista_clientes"
+        <activity
+            android:name=".activity.lista_clientes"
             android:label="Clientes"
             android:parentActivityName=".Principal">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Principal" />
         </activity>
+        <activity android:name=".activity.FormularioCliente"></activity>
     </application>
 
 </manifest>

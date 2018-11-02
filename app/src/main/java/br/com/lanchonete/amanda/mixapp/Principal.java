@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import br.com.lanchonete.amanda.mixapp.activity.lista_clientes;
+
 public class Principal extends AppCompatActivity {
 
     Button btn_principal_clientes;
