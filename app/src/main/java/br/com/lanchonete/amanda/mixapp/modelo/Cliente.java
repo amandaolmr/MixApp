@@ -13,6 +13,14 @@ public class Cliente implements Serializable {
     public Cliente() {
     }
 
+    public Cliente(Integer id, String nome, String telefone, String rua, String bairro) {
+        this.id = id;
+        this.nome = nome;
+        this.telefone = telefone;
+        this.rua = rua;
+        this.bairro = bairro;
+    }
+
     public Integer getId() {
         return id;
     }
