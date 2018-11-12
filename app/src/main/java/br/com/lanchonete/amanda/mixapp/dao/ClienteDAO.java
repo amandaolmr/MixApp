@@ -3,98 +3,140 @@ package br.com.lanchonete.amanda.mixapp.dao;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.lanchonete.amanda.mixapp.modelo.Cliente;
 
-public class ClienteDAO implements IClienteDAO {
+public class ClienteDAO extends SQLiteOpenHelper {
 
-    private SQLiteDatabase db;
-    private CriarBanco criarBanco;
+    private static final String NOME_BANCO = "mixapp";
+    private static  final int VERSAO = 1;
 
-    public ClienteDAO (Context context){
-        criarBanco = new CriarBanco(context);
+    private static final String CLIENTE_TABELA = "cliente";
+    private static final String CLIENTE_ID = "id";
+    private static final String CLIENTE_NOME = "nome";
+    private static final String CLIENTE_TELEFONE = "telefone";
+    private static final String CLIENTE_RUA = "rua";
+    private static final String CLIENTE_BAIRRO = "bairro";
+
+
+    public ClienteDAO( Context context) {
+        super(context, NOME_BANCO, null, VERSAO);
     }
 
     @Override
-    public boolean salvarCliente(Cliente cliente) {
+    public void onCreate(SQLiteDatabase db) {
+        StringBuilder sqlCliente = new StringBuilder();
+        sqlCliente.append("CREATE TABLE "+ CLIENTE_TABELA+ " (" );
+        sqlCliente.append( CLIENTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, ");
+        sqlCliente.append(CLIENTE_NOME + " TEXT, ");
+        sqlCliente.append(CLIENTE_TELEFONE + " TEXT, ");
+        sqlCliente.append(CLIENTE_RUA + " TEXT, ");
+        sqlCliente.append(CLIENTE_BAIRRO + " TEXT ");
+        sqlCliente.append(" ); ");
+
+        db.execSQL(sqlCliente.toString());
+
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        StringBuilder sqlCliente = new StringBuilder();
+        sqlCliente.append("DROP TABLE IF EXISTS " + CLIENTE_TABELA);
+        db.execSQL(sqlCliente.toString());
+        onCreate(db);
+
+    }
+
+     public long salvarCliente(Cliente cli){
         ContentValues values = new ContentValues();
-        values.put(criarBanco.CLIENTE_NOME, cliente.getNome());
-        values.put(criarBanco.CLIENTE_TELEFONE, cliente.getTelefone());
-        values.put(criarBanco.CLIENTE_RUA, cliente.getRua());
-        values.put(criarBanco.CLIENTE_BAIRRO, cliente.getBairro());
+        long retornoDB;// retorno do banco
 
-        try {
+         values.put(CLIENTE_NOME, cli.getNome());
+         values.put(CLIENTE_TELEFONE, cli.getTelefone());
+         values.put(CLIENTE_RUA, cli.getRua());
+         values.put(CLIENTE_BAIRRO, cli.getBairro());
 
-            db = criarBanco.getWritableDatabase();
-            db.insert(criarBanco.CLIENTE_TABELA, null, values);
+         retornoDB = getWritableDatabase().insert(CLIENTE_TABELA, null, values);
 
-        }catch (SQLException e){
-            return false;
-        }
 
-        return true;
-    }
+        return retornoDB;
+     }
 
-    @Override
-    public boolean atualizaCliente(Cliente cliente) {
+    public long alterarCliente(Cliente cli){
         ContentValues values = new ContentValues();
-        values.put(criarBanco.CLIENTE_NOME, cliente.getNome());
-        values.put(criarBanco.CLIENTE_TELEFONE, cliente.getTelefone());
-        values.put(criarBanco.CLIENTE_RUA, cliente.getRua());
-        values.put(criarBanco.CLIENTE_BAIRRO, cliente.getBairro());
+        long retornoDB;// retorno do banco
 
-        String where = criarBanco.CLIENTE_ID + " = ?";
-        String[] args = {cliente.getId().toString()};
+        values.put(CLIENTE_NOME, cli.getNome());
+        values.put(CLIENTE_TELEFONE, cli.getTelefone());
+        values.put(CLIENTE_RUA, cli.getRua());
+        values.put(CLIENTE_BAIRRO, cli.getBairro());
 
-        try {
+        String [] args = {String.valueOf(cli.getId())};
 
-            db = criarBanco.getWritableDatabase();
-            db.update(criarBanco.CLIENTE_TABELA, values, where, args);
+        retornoDB = getWritableDatabase().update(CLIENTE_TABELA, values, " id = ?", args);
 
-        }catch (SQLException e){
-            return  false;
-        }
-        return true;
+
+        return retornoDB;
     }
 
-    @Override
-    public boolean deletarCliente(Cliente cliente) {
-        String where = criarBanco.CLIENTE_ID + " = ?";
-        String[] args = {cliente.getId().toString()};
+    public long excluirCliente(Cliente cli){
+        long retornoDB;
 
-        try {
-            db = criarBanco.getWritableDatabase();
-            db.delete(criarBanco.CLIENTE_TABELA, where, args);
-        }catch (SQLException e){
-            return false;
-        }
+        String [] args = {String.valueOf(cli.getId())};
 
-        return true;
+        retornoDB = getWritableDatabase().delete(CLIENTE_TABELA,CLIENTE_ID +"=?", args);
+
+        return  retornoDB;
     }
 
-    @Override
-    public List<Cliente> listarClientes() {
+     public  ArrayList<Cliente> listarCliente(){
+        String[] colunas = {CLIENTE_ID, CLIENTE_NOME, CLIENTE_TELEFONE, CLIENTE_RUA, CLIENTE_BAIRRO};
+        Cursor cursor = getWritableDatabase().query(CLIENTE_TABELA, colunas, null, null, null, null, "upper (nome)", null);
 
-        List<Cliente>clientes = new ArrayList<>();
-        String sqlConsulta = "SELECT *FROM "+ criarBanco.CLIENTE_TABELA + " ;";
-        db = criarBanco.getWritableDatabase();
-        Cursor cursor = db.rawQuery(sqlConsulta, null);
+        ArrayList<Cliente>listaClientes = new ArrayList<>();
+        while(cursor.moveToNext()){
+            Cliente cliente = new Cliente();
 
-        while (cursor.moveToNext()){
-            Integer id = cursor.getInt(cursor.getColumnIndex(criarBanco.CLIENTE_ID));
-            String nome = cursor.getString(cursor.getColumnIndex(criarBanco.CLIENTE_NOME));
-            String telefone = cursor.getString(cursor.getColumnIndex(criarBanco.CLIENTE_TELEFONE));
-            String rua = cursor.getString(cursor.getColumnIndex(criarBanco.CLIENTE_RUA));
-            String bairro = cursor.getString(cursor.getColumnIndex(criarBanco.CLIENTE_BAIRRO));
+            cliente.setId(cursor.getInt(0));
+            cliente.setNome(cursor.getString(1));
+            cliente.setTelefone(cursor.getString(2));
+            cliente.setRua(cursor.getString(3));
+            cliente.setBairro(cursor.getString(4));
 
-            Cliente cliente = new Cliente(id,nome, telefone, rua, bairro);
-            clientes.add(cliente);
+            listaClientes.add(cliente);
         }
-        return clientes;
-    }
+
+        return listaClientes;
+     }
+
+
+
+
+     /*ublic List<Cliente>listarClienteLike(String nome){
+         String[] colunas = {CLIENTE_NOME};
+         Cursor cursor = getWritableDatabase().query(CLIENTE_TABELA, colunas, null, null, null, null, "upper (nome)", null);
+
+         ArrayList<Cliente>listaClientes = new ArrayList<>();
+         while(cursor.moveToNext()){
+             Cliente cliente = new Cliente();
+
+             cliente.setId(cursor.getInt(0));
+             cliente.setNome(cursor.getString(1));
+
+
+             listaClientes.add(cliente);
+         }
+    return listaClientes;
+     }
+     */
 }

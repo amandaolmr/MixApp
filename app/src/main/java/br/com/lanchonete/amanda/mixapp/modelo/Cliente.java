@@ -13,13 +13,7 @@ public class Cliente implements Serializable {
     public Cliente() {
     }
 
-    public Cliente(Integer id, String nome, String telefone, String rua, String bairro) {
-        this.id = id;
-        this.nome = nome;
-        this.telefone = telefone;
-        this.rua = rua;
-        this.bairro = bairro;
-    }
+
 
     public Integer getId() {
         return id;
@@ -63,12 +57,6 @@ public class Cliente implements Serializable {
 
     @Override
     public String toString() {
-        return "Cliente{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", telefone='" + telefone + '\'' +
-                ", rua='" + rua + '\'' +
-                ", bairro='" + bairro + '\'' +
-                '}';
+        return nome.toString() ;
     }
 }

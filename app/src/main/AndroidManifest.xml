@@ -32,7 +32,16 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".Principal" />
         </activity>
-        <activity android:name=".activity.FormularioCliente"></activity>
+        <activity android:name=".activity.FormularioCliente"
+            android:label="Cadastro"
+            android:parentActivityName = ".activity.lista_clientes">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.lista_clientes"/>
+
+    </activity>
+
+        <activity android:name=".lista_cardapio"></activity>
     </application>
 
 </manifest>
